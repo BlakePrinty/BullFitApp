@@ -30,7 +30,14 @@ public class GlobalExceptionHandler {
                 .body(build(409, ex.getMessage(), req.getRequestURI()));
     }
 
-    // Thrown by AuthenticationManager when email/password don't match.
+    // Added for BullSplits — user authenticated but doesn't own the resource.
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(
+            UnauthorizedException ex, HttpServletRequest req) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(build(403, ex.getMessage(), req.getRequestURI()));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(
             BadCredentialsException ex, HttpServletRequest req) {
@@ -38,8 +45,6 @@ public class GlobalExceptionHandler {
                 .body(build(401, "Invalid email or password", req.getRequestURI()));
     }
 
-    // Thrown when @Valid on a request DTO fails.
-    // Returns a map of { fieldName: errorMessage } instead of the standard wrapper.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidation(
             MethodArgumentNotValidException ex) {
